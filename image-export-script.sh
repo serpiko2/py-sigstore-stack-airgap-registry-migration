@@ -34,8 +34,7 @@ for image in "${found_images[@]}"; do
     # Obtain the new sha256 from the `docker push` output
     # new_sha=$(docker push "${TARGET_REGISTRY}/${image_path}" | tail -n1 | cut -d' ' -f3)
 
-    new_reference="${TARGET_REGISTRY}/${image_path}@${new_sha}"
-    echo "${image};${save_file};${new_reference}" > ${output_file}
+    # new_reference="${TARGET_REGISTRY}/${image_path}@${new_sha}"
   else
     echo "loading tag reference for image: ${image}"
     # If image is a tag reference
@@ -51,9 +50,9 @@ for image in "${found_images[@]}"; do
     #docker tag ${image} ${TARGET_REGISTRY}/${image_path}
     #docker push ${TARGET_REGISTRY}/${image_path}
 
-    new_reference="${TARGET_REGISTRY}/${image_path}"
-    echo "${image};${save_file};${new_reference}" > ${output_file}
+    # new_reference="${TARGET_REGISTRY}/${image_path}"
   fi
+  echo "${image};${save_file};" >> ${output_file}
 
   # Replace the image reference with the new reference in all the release-*.yaml
   #sed -i.bak -E "s#image: ${image}#image: ${new_reference}#" release-*.yaml
