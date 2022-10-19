@@ -39,6 +39,7 @@ for image in "${found_images[@]}"; do
     # If image is a tag reference
     image_path=$(echo ${image} | cut -d'/' -f2-)
     image_name=$(echo ${image_path////.})
+    image_name=$(echo ${image_name//:/v})
 
     echo "tag image_reference pull: ${image_path}"
     docker pull ${image}
