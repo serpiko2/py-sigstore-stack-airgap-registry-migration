@@ -1,7 +1,6 @@
-while getopts t:y:o:f: flag
+while getopts y:o:f: flag
 do
     case "${flag}" in
-        t) TARGET_REGISTRY=${OPTARG};;
         y) YAML_FOLDER=${OPTARG};;
         o) OUTPUT_FOLDER=${OPTARG};;
         f) OUTPUT_FILENAME=${OPTARG};;
