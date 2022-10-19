@@ -12,6 +12,7 @@ done
 found_images=($(yq eval '.. | select(has("image")) | .image' ${YAML_FOLDER}/release-*.yaml | grep --invert-match  -- '---'))
 output_file="${OUTPUT_FOLDER}/${OUTPUT_FILENAME}.yaml"
 touch ${output_file}
+printf "images:\n" > ${output_file}
 # Loop through each found image
 # Pull and save the images
 for image in "${found_images[@]}"; do
@@ -39,7 +40,5 @@ for image in "${found_images[@]}"; do
     save_file="${OUTPUT_FOLDER}/${image_name}.tar"
     docker save -o "${save_file}" "${image}"
   fi
-  printf "images:\n${image_name}: \nimage: ${image} \nsaved_file: ${save_file}\n" >> ${output_file} 
+  printf "  ${image_name}: \n    image: ${image} \n    saved_file: ${save_file}\n" >> ${output_file}
 done
-
-EOF
