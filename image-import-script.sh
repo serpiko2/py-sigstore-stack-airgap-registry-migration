@@ -1,7 +1,9 @@
-while getopts t:y:i:f: flag
+while getopts t:u:p:y:i:f: flag
 do
     case "${flag}" in
         t) TARGET_REGISTRY=${OPTARG};;
+        u) REGISTRY_USERNAME=${OPTARG};;
+        p) REGISTRY_PASSWORD=${OPTARG};;
         y) YAML_FOLDER=${OPTARG};;
         f) INPUT_FILENAME=${OPTARG};;
     esac
@@ -9,7 +11,7 @@ done
 
 # Use yq to find all "image" keys from the yaml exported
 found_images=($(yq eval '.. | select(has("image")) | .image' ${INPUT_FILENAME} | grep --invert-match  -- '---'))
-
+docker login -u ${REGISTRY_USERNAME} -p ${REGISTRY_PASSWORD} ${TARGET_REGISTRY}
 # Loop through each found image
 # Load, tag and push the images
 for image in "${found_images[@]}"; do
