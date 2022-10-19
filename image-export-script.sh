@@ -1,7 +1,14 @@
-TARGET_REGISTRY=TARGETREGISTRY
+while getopts t:y:o: flag
+do
+    case "${flag}" in
+        t) TARGET_REGISTRY=${OPTARG};;
+        i) YAML_FOLDER=${OPTARG};;
+        o) OUTPUT_FOLDER=${OPTARG};;
+    esac
+done
 
 # Use yq to find all "image" keys from the release-*.yaml downloaded
-found_images=($(yq eval '.. | select(has("image")) | .image' release-*.yaml | grep --invert-match  -- '---'))
+found_images=($(yq eval '.. | select(has("image")) | .image' ${YAML_FOLDER}/release-*.yaml | grep --invert-match  -- '---'))
 
 # Loop through each found image
 # Pull, retag, push the images
@@ -15,11 +22,11 @@ for image in "${found_images[@]}"; do
     image_path=$(echo "${image_ref}" | cut -d'/' -f2-)
     image_name=$(echo ${image_path////.})
     
-    echo "image_reference pull: ${image_path}"
+    echo "digest image_reference pull: ${image_path}"
     docker pull ${image}
 
-    echo "image_name save: ${image_name}"
-    docker save -o "/opt/sigstore-stack/images/${image_name}.tar" "${image}"
+    echo "digest image_name save: ${image_name}"
+    docker save -o "${OUTPUT_FOLDER}/${image_name}.tar" "${image}"
     # docker tag "${image}" "${TARGET_REGISTRY}/${image_path}"
     # Obtain the new sha256 from the `docker push` output
     # new_sha=$(docker push "${TARGET_REGISTRY}/${image_path}" | tail -n1 | cut -d' ' -f3)
@@ -31,11 +38,11 @@ for image in "${found_images[@]}"; do
     image_path=$(echo ${image} | cut -d'/' -f2-)
     image_name=$(echo ${image_path////.})
 
-    echo "image_reference pull: ${image_path}"
+    echo "tag image_reference pull: ${image_path}"
     docker pull ${image}
 
-    echo "image_name save: ${image_name}"
-    docker save -o "/opt/sigstore-stack/images/${image_name}.tar" "${image}"
+    echo "tag image_name save: ${image_name}"
+    docker save -o "${OUTPUT_FOLDER}/${image_name}.tar" "${image}"
     #docker tag ${image} ${TARGET_REGISTRY}/${image_path}
     #docker push ${TARGET_REGISTRY}/${image_path}
 
