@@ -3,15 +3,12 @@ do
     case "${flag}" in
         t) TARGET_REGISTRY=${OPTARG};;
         y) YAML_FOLDER=${OPTARG};;
-        i) IMAGE_FOLDER=${OPTARG};;
         f) INPUT_FILENAME=${OPTARG};;
     esac
 done
 
 # Use yq to find all "image" keys from the yaml exported
-#
-# TODO
-#
+found_images=($(yq eval '.. | select(has("image")) | .image' ${INPUT_FILENAME} | grep --invert-match  -- '---'))
 
 # Loop through each found image
 # Load, tag and push the images
@@ -24,7 +21,7 @@ for image in "${found_images[@]}"; do
     image_path=$(echo "${image_ref}" | cut -d'/' -f2-)
     image_name=$(echo ${image_path////.})
     echo "digest image_name save: ${image_name}"
-    docker load -o "${save_file}" "${image}"
+    docker load -i "${image}"
     docker tag "${image}" "${TARGET_REGISTRY}/${image_path}"
     # Obtain the new sha256 from the `docker push` output
     new_sha=$(docker push "${TARGET_REGISTRY}/${image_path}" | tail -n1 | cut -d' ' -f3)
@@ -42,5 +39,5 @@ for image in "${found_images[@]}"; do
     new_reference="${TARGET_REGISTRY}/${image_path}"
   fi
   # Replace the image reference with the new reference in all the release-*.yaml
-  sed -i.bak -E "s#image: ${image}#image: ${new_reference}#" release-*.yaml
+  sed -i.bak -E "s#image: ${image}#image: ${new_reference}#" ${YAML_FOLDER}/release-*.yaml
 done

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 while getopts y:o:f: flag
 do
     case "${flag}" in
@@ -37,5 +39,7 @@ for image in "${found_images[@]}"; do
     save_file="${OUTPUT_FOLDER}/${image_name}.tar"
     docker save -o "${save_file}" "${image}"
   fi
-  yq w ${output_file} images.image ${image} saved_file ${save_file};"
+  printf "images:\n${image_name}: \nimage: ${image} \nsaved_file: ${save_file}\n" >> ${output_file} 
 done
+
+EOF
