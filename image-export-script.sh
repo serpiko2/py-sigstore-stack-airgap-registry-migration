@@ -1,4 +1,4 @@
-while getopts t:y:o: flag
+while getopts t:i:o: flag
 do
     case "${flag}" in
         t) TARGET_REGISTRY=${OPTARG};;
