@@ -39,5 +39,5 @@ for image in "${found_images[@]}"; do
     new_reference="${TARGET_REGISTRY}/${image_path}"
   fi
   # Replace the image reference with the new reference in all the release-*.yaml
-  sed -i.bak -E "s#image: ${image}#image: ${new_reference}#" output_${YAML_FOLDER}/release-*.yaml
+  sed -E "s#image: ${image}#image: ${new_reference}#" output_${YAML_FOLDER}/release-*.yaml
 done
