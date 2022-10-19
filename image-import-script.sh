@@ -21,7 +21,7 @@ for image in "${found_images[@]}"; do
     image_path=$(echo "${image_ref}" | cut -d'/' -f2-)
     image_name=$(echo ${image_path////.})
     echo "digest image_name save: ${image_name}"
-    docker load -i "${image}"
+    docker load -i "${save_file}"
     docker tag "${image}" "${TARGET_REGISTRY}/${image_path}"
     # Obtain the new sha256 from the `docker push` output
     new_sha=$(docker push "${TARGET_REGISTRY}/${image_path}" | tail -n1 | cut -d' ' -f3)
@@ -33,11 +33,11 @@ for image in "${found_images[@]}"; do
     image_name=$(echo ${image_path////.})
     image_name=$(echo ${image_name//:/v})
     echo "tag image_name save: ${image_name}"    
-    docker load -o "${save_file}" "${image}"
+    docker load -i "${save_file}"
     docker tag ${image} ${TARGET_REGISTRY}/${image_path}
     docker push ${TARGET_REGISTRY}/${image_path}
     new_reference="${TARGET_REGISTRY}/${image_path}"
   fi
   # Replace the image reference with the new reference in all the release-*.yaml
-  sed -i.bak -E "s#image: ${image}#image: ${new_reference}#" ${YAML_FOLDER}/release-*.yaml
+  sed -i.bak -E "s#image: ${image}#image: ${new_reference}#" output_${YAML_FOLDER}/release-*.yaml
 done
