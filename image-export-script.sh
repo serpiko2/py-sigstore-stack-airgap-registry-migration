@@ -1,15 +1,17 @@
-while getopts t:i:o: flag
+while getopts t:y:o:f: flag
 do
     case "${flag}" in
         t) TARGET_REGISTRY=${OPTARG};;
-        i) YAML_FOLDER=${OPTARG};;
+        y) YAML_FOLDER=${OPTARG};;
         o) OUTPUT_FOLDER=${OPTARG};;
+        f) OUTPUT_FILENAME=${OPTARG};;
     esac
 done
 
 # Use yq to find all "image" keys from the release-*.yaml downloaded
 found_images=($(yq eval '.. | select(has("image")) | .image' ${YAML_FOLDER}/release-*.yaml | grep --invert-match  -- '---'))
-
+output_file="${OUTPUT_FOLDER}/${OUTPUT_FILENAME}"
+cat > "${output_file}"
 # Loop through each found image
 # Pull, retag, push the images
 # Update the found image references in all the release-*.yaml
@@ -26,12 +28,14 @@ for image in "${found_images[@]}"; do
     docker pull ${image}
 
     echo "digest image_name save: ${image_name}"
-    docker save -o "${OUTPUT_FOLDER}/${image_name}.tar" "${image}"
+    save_file="${OUTPUT_FOLDER}/${image_name}.tar"
+    docker save -o "${save_file}" "${image}"
     # docker tag "${image}" "${TARGET_REGISTRY}/${image_path}"
     # Obtain the new sha256 from the `docker push` output
     # new_sha=$(docker push "${TARGET_REGISTRY}/${image_path}" | tail -n1 | cut -d' ' -f3)
 
     new_reference="${TARGET_REGISTRY}/${image_path}@${new_sha}"
+    echo "${image};${save_file};${new_reference}"
   else
     echo "loading tag reference for image: ${image}"
     # If image is a tag reference
@@ -41,12 +45,14 @@ for image in "${found_images[@]}"; do
     echo "tag image_reference pull: ${image_path}"
     docker pull ${image}
 
-    echo "tag image_name save: ${image_name}"
-    docker save -o "${OUTPUT_FOLDER}/${image_name}.tar" "${image}"
+    echo "tag image_name save: ${image_name}"    
+    save_file="${OUTPUT_FOLDER}/${image_name}.tar"
+    docker save -o "${save_file}" "${image}"
     #docker tag ${image} ${TARGET_REGISTRY}/${image_path}
     #docker push ${TARGET_REGISTRY}/${image_path}
 
-    #new_reference="${TARGET_REGISTRY}/${image_path}"
+    new_reference="${TARGET_REGISTRY}/${image_path}"
+    echo "${image};${save_file};${new_reference}"
   fi
 
   # Replace the image reference with the new reference in all the release-*.yaml
