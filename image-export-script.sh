@@ -40,5 +40,5 @@ for image in "${found_images[@]}"; do
     save_file="${OUTPUT_FOLDER}/${image_name}.tar"
     docker save -o "${save_file}" "${image}"
   fi
-  printf "  ${image_name}: \n    image: ${image} \n    saved_file: ${save_file}\n" >> ${output_file}
+  printf "${image_name};${image};${save_file}\n" >> ${output_file}
 done
