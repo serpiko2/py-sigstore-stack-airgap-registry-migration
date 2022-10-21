@@ -10,9 +10,8 @@ do
 done
 # Use yq to find all "image" keys from the release-*.yaml downloaded
 found_images=($(yq eval '.. | select(has("image")) | .image' ${YAML_FOLDER}/release-*.yaml | grep --invert-match  -- '---'))
-output_file="${OUTPUT_FOLDER}/${OUTPUT_FILENAME}.yaml"
+output_file="${OUTPUT_FOLDER}/${OUTPUT_FILENAME}.csv"
 touch ${output_file}
-printf "images:\n" > ${output_file}
 # Loop through each found image
 # Pull and save the images
 for image in "${found_images[@]}"; do
@@ -40,5 +39,5 @@ for image in "${found_images[@]}"; do
     save_file="${OUTPUT_FOLDER}/${image_name}.tar"
     docker save -o "${save_file}" "${image}"
   fi
-  printf "${image_name};${image};${save_file}\n" >> ${output_file}
+  printf "${image_name},${image},${save_file}\n" >> ${output_file}
 done
